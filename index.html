@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>SC811 UCC Locations</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.3.4/leaflet.css" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.locatecontrol/dist/L.Control.Locate.min.css" />
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Quicksand', sans-serif;
+            font-size: 100%;
+            color: #3d3d3d;
+        }
+
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+        }
+
+        h1 {
+  			position: fixed;
+  			margin-top: 0;
+  			top: 30px;
+  			left: 45%;
+            color:aliceblue;
+  			font-size: 1.5em;
+  			font-family: 'Quicksand', sans-serif;
+  			font-weight: 700;
+  			letter-spacing: .04em;
+  			padding: 10px 15px;
+  			/* Add styles to match Leaflet UI elements */
+  			background: rgba(0, 0, 0, 0.5);
+  			box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  			border: 1px solid #ddd;
+  			border-radius: 5px;
+  			z-index: 800;
+  		}
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>SC811 UCC Meetings</h1>
+    </header>
+    <div id='map'></div>
+    <script src="https://unpkg.com/leaflet@1.3.4/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="data/us_states_20m.js"></script>
+    <script type="text/javascript" src="data/addresses.json"></script>
+    <script>
+        // map options
+        var options = {
+            center: [33.83333333, -80.86666667],
+            zoom: 8.25
+        }
+
+        // create a Leaflet map in our division container with id of 'map'
+        var map = L.map('map', options);
+
+        // Leaflet providers base map URL
+        var basemap_source = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+
+        // Leaflet providers attributes
+        var basemap_options = {
+            attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+            bounds: [
+                [-85.0511287776, -179.999999975],
+                [85.0511287776, 179.999999975]
+            ]
+        };
+        // request some basemap tiles and add to the map
+        var tiles = L.tileLayer(basemap_source, basemap_options);
+
+        map.addLayer(tiles);
+
+        // add the state outline to the map
+        var stateLayer = L.geoJson(states, {
+            style: function (feature) {
+                return {
+                    color: '#444',
+                    weight: 4,
+                    fillOpacity: 0,
+                    interactive: false
+                };
+            },
+
+            // Filter for the correct state to use
+            filter: function (feature) {
+                if (feature.properties.NAME == "South Carolina") {
+                    return feature;
+                }
+            }
+        });
+
+        // Add layer to map!
+        stateLayer.addTo(map);
+
+        // AJAX request for GeoJSON data
+        $.getJSON("data/addresses.json", function (addresses) {
+                processData(addresses);
+            })
+            .fail(function () {
+                console.log('an error occured with the ajax/json')
+            });
+
+        function processData(addresses) {
+            // loop through all the counties
+            const keys = Object.keys(addresses);
+            console.log(keys);
+            for (const key of keys) {
+                console.log(key)
+                var marker = L.marker([addresses[key].latitude, addresses[key].longitude]).addTo(map)
+                    .bindPopup(key.toLocaleString());
+                marker.on('mouseover', function () {
+                    this.openPopup();
+                })
+                marker.on("mouseout", function () {
+                    this.closePopup();
+                });
+            }
+        }
+    </script>
+</body>
+
+</html>
