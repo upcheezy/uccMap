@@ -18,6 +18,7 @@ import requests
 import logging
 import time
 import json
+import config
 
 logger = logging.getLogger("root")
 logger.setLevel(logging.DEBUG)
@@ -34,13 +35,13 @@ logger.addHandler(ch)
 # With a "Google Maps Geocoding API" key from https://console.developers.google.com/apis/, 
 # the daily limit will be 2500, but at a much faster rate.
 # Example: API_KEY = 'AIzaSyC9azed9tLdjpZNjg2_kVePWvMIBq154eA'
-API_KEY = api_key
+API_KEY = config.api_key
 # Backoff time sets how many minutes to wait between google pings when your API limit is hit
 BACKOFF_TIME = 30
 # Set your output file name here.
-output_filename = 'C:/geocode testing/data/output-2015.csv'
+output_filename = '/home/mattupchurch/Projects/uccMap/data/output-2015.csv'
 # Set your input file here
-input_filename = "C:/geocode testing/data/ucc.csv"
+input_filename = "/home/mattupchurch/Projects/uccMap/data/ucc.csv"
 # Specify the column name in your input data that contains addresses here
 address_column_name = "Address"
 attribute_column_name = 'Meeting'
@@ -170,7 +171,7 @@ for key, value in addresses.items():
         pd.DataFrame(results).to_csv("{}_bak".format(output_filename))
 
 # All done
-with open('data/addresses.js', 'w') as outfile:
+with open('data/addresses.json', 'w') as outfile:
         json.dump(results, outfile)
 # logger.info("Finished geocoding all addresses")
 # Write the full results to csv using the pandas library.
